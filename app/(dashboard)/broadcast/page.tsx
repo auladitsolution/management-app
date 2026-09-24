@@ -153,12 +153,9 @@ HTML ফরম্যাটিং ব্যবহার করতে পারব
             {form.message && (
               <div className="bg-blue-900/20 border border-blue-500/20 rounded-xl p-4">
                 <p className="text-xs text-blue-400 font-semibold mb-2">📱 প্রিভিউ (Telegram)</p>
-                <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: form.message
-                    .replace(/<b>(.*?)<\/b>/g, '<strong>$1</strong>')
-                    .replace(/<i>(.*?)<\/i>/g, '<em>$1</em>')
-                  }}
-                />
+                <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {form.message}
+                </p>
               </div>
             )}
 

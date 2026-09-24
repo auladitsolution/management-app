@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Client from '@/models/Client'
 import { encryptCredentials, decryptCredentials } from '@/lib/encryption'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
 // GET single client with decrypted credentials
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params
@@ -28,6 +31,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 // PUT update client
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params
@@ -75,6 +80,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
 // DELETE client
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params

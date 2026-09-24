@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { Plus, Search, Eye, Edit2, Trash2, FolderKanban, ExternalLink, Github } from 'lucide-react'
 import Link from 'next/link'
@@ -20,10 +20,10 @@ const PROJECT_TYPES = ['ই-কমার্স', 'পোর্টফোলিও
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([])
-  const [clients, setClients]   = useState<any[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [search, setSearch]     = useState('')
-  const [status, setStatus]     = useState('')
+  const [clients, setClients] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({
     name: '', projectType: '', liveUrl: '', githubUrl: '',
@@ -32,14 +32,14 @@ export default function ProjectsPage() {
   })
   const [saving, setSaving] = useState(false)
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
     axios.get('/api/projects', { params: { search, status } })
       .then((r) => setProjects(r.data.projects))
       .finally(() => setLoading(false))
-  }
+  }, [search, status])
 
-  useEffect(() => { load() }, [search, status])
+  useEffect(() => { load() }, [load])
   useEffect(() => {
     axios.get('/api/clients').then((r) => setClients(r.data.clients))
   }, [])
@@ -92,7 +92,7 @@ export default function ProjectsPage() {
       <div className="glass-card p-4 flex flex-wrap gap-3">
         <div className="flex-1 min-w-48 relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input type="text" placeholder="প্রজেক্টের নাম দিয়ে খুঁজুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-dark pl-9" />
+          <input type="text" placeholder="    প্রজেক্টের নাম দিয়ে খুঁজুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-dark pl-9" />
         </div>
         <select value={status} onChange={(e) => setStatus(e.target.value)} className="input-dark w-44">
           <option value="">সব স্ট্যাটাস</option>
@@ -185,25 +185,25 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">প্রজেক্টের নাম *</label>
-                  <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="input-dark" placeholder="প্রজেক্টের নাম" />
+                  <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input-dark" placeholder="প্রজেক্টের নাম" />
                 </div>
                 <div>
                   <label className="form-label">ক্লায়েন্ট *</label>
-                  <select required value={form.clientId} onChange={(e) => setForm({...form, clientId: e.target.value})} className="input-dark">
+                  <select required value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })} className="input-dark">
                     <option value="">ক্লায়েন্ট নির্বাচন করুন</option>
                     {clients.map((c) => <option key={c._id} value={c._id}>{c.name} {c.businessName ? `(${c.businessName})` : ''}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="form-label">প্রজেক্টের ধরন *</label>
-                  <select required value={form.projectType} onChange={(e) => setForm({...form, projectType: e.target.value})} className="input-dark">
+                  <select required value={form.projectType} onChange={(e) => setForm({ ...form, projectType: e.target.value })} className="input-dark">
                     <option value="">ধরন নির্বাচন করুন</option>
                     {PROJECT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="form-label">স্ট্যাটাস</label>
-                  <select value={form.status} onChange={(e) => setForm({...form, status: e.target.value})} className="input-dark">
+                  <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="input-dark">
                     <option value="উন্নয়নাধীন">উন্নয়নাধীন</option>
                     <option value="পরীক্ষামূলক">পরীক্ষামূলক</option>
                     <option value="হস্তান্তরিত">হস্তান্তরিত</option>
@@ -212,19 +212,19 @@ export default function ProjectsPage() {
                 </div>
                 <div>
                   <label className="form-label">Live URL (Vercel)</label>
-                  <input value={form.liveUrl} onChange={(e) => setForm({...form, liveUrl: e.target.value})} className="input-dark" placeholder="https://project.vercel.app" />
+                  <input value={form.liveUrl} onChange={(e) => setForm({ ...form, liveUrl: e.target.value })} className="input-dark" placeholder="https://project.vercel.app" />
                 </div>
                 <div>
                   <label className="form-label">GitHub URL</label>
-                  <input value={form.githubUrl} onChange={(e) => setForm({...form, githubUrl: e.target.value})} className="input-dark" placeholder="https://github.com/..." />
+                  <input value={form.githubUrl} onChange={(e) => setForm({ ...form, githubUrl: e.target.value })} className="input-dark" placeholder="https://github.com/..." />
                 </div>
                 <div>
                   <label className="form-label">মোট মূল্য (টাকা)</label>
-                  <input type="number" value={form.totalPrice} onChange={(e) => setForm({...form, totalPrice: +e.target.value})} className="input-dark" placeholder="০" />
+                  <input type="number" value={form.totalPrice} onChange={(e) => setForm({ ...form, totalPrice: +e.target.value })} className="input-dark" placeholder="০" />
                 </div>
                 <div>
                   <label className="form-label">ওয়ারেন্টি (মাস)</label>
-                  <input type="number" value={form.warrantyMonths} onChange={(e) => setForm({...form, warrantyMonths: +e.target.value})} className="input-dark" placeholder="৩" />
+                  <input type="number" value={form.warrantyMonths} onChange={(e) => setForm({ ...form, warrantyMonths: +e.target.value })} className="input-dark" placeholder="৩" />
                 </div>
               </div>
 
@@ -250,7 +250,7 @@ export default function ProjectsPage() {
 
               <div>
                 <label className="form-label">বিবরণ</label>
-                <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} className="input-dark" rows={3} placeholder="প্রজেক্টের বিস্তারিত..." />
+                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input-dark" rows={3} placeholder="প্রজেক্টের বিস্তারিত..." />
               </div>
 
               <div className="flex gap-3 pt-2">

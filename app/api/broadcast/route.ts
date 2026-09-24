@@ -3,8 +3,11 @@ import connectDB from '@/lib/mongodb'
 import Representative from '@/models/Representative'
 import BroadcastMessage from '@/models/BroadcastMessage'
 import { broadcastMessage } from '@/lib/telegram'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const messages = await BroadcastMessage.find().sort({ createdAt: -1 }).limit(50)
@@ -15,6 +18,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const body = await request.json()
@@ -45,7 +50,7 @@ export async function POST(request: NextRequest) {
       successCount:   result.success,
       failedCount:    result.failed,
       sentBy,
-      results: result.results.map((r, i) => ({
+      results: result.results.map((r) => ({
         representativeId: reps[chatIds.indexOf(r.chatId)]?._id,
         name:             reps[chatIds.indexOf(r.chatId)]?.name || 'অজানা',
         chatId:           r.chatId,

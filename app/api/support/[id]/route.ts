@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import SupportTicket from '@/models/SupportTicket'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params
@@ -17,6 +20,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params
@@ -42,6 +47,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { Plus, HeadphonesIcon, Clock, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
@@ -31,14 +31,14 @@ export default function SupportPage() {
   })
   const [saving, setSaving] = useState(false)
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
     axios.get('/api/support', { params: { status: statusFilter } })
       .then((r) => setTickets(r.data.tickets))
       .finally(() => setLoading(false))
-  }
+  }, [statusFilter])
 
-  useEffect(() => { load() }, [statusFilter])
+  useEffect(() => { load() }, [load])
   useEffect(() => {
     axios.get('/api/clients').then((r) => setClients(r.data.clients))
   }, [])

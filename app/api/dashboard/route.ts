@@ -1,12 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Client from '@/models/Client'
 import Payment from '@/models/Payment'
 import Project from '@/models/Project'
 import SupportTicket from '@/models/SupportTicket'
 import Representative from '@/models/Representative'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
 

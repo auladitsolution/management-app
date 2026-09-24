@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
+import AxiosAuthSetup from '@/components/AxiosAuthSetup'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
@@ -31,6 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-dark-bg overflow-hidden">
+      <AxiosAuthSetup />
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Navbar />

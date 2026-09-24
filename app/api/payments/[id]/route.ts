@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Payment from '@/models/Payment'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params
@@ -17,6 +20,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params
@@ -25,8 +30,19 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!payment) return NextResponse.json({ error: 'পেমেন্ট পাওয়া যায়নি' }, { status: 404 })
 
     if (body.newPayment) {
+      const newAmount = Number(body.newPayment.amount)
+      // Backend validation: prevent overpayment
+      if (newAmount <= 0) {
+        return NextResponse.json({ error: 'পরিমাণ অবশ্যই শূন্যের বেশি হতে হবে' }, { status: 400 })
+      }
+      if (newAmount > payment.dueAmount) {
+        return NextResponse.json(
+          { error: `পরিমাণ বকেয়ার (৳${payment.dueAmount}) বেশি হতে পারবে না` },
+          { status: 400 }
+        )
+      }
       payment.payments.push(body.newPayment)
-      payment.paidAmount += body.newPayment.amount
+      payment.paidAmount += newAmount
     } else {
       Object.assign(payment, body)
     }
@@ -39,6 +55,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { id } = await params

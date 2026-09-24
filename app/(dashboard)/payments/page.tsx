@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import axios from 'axios'
-import { Plus, CreditCard, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react'
+import { Plus, CreditCard, AlertTriangle, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
 const formatTaka = (v: number) => `৳${Number(v || 0).toLocaleString('bn-BD')}`
 
 export default function PaymentsPage() {
+  const searchParams = useSearchParams()
+
   const [payments, setPayments]   = useState<any[]>([])
   const [loading, setLoading]     = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -16,7 +19,8 @@ export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
   const [clients, setClients]     = useState<any[]>([])
   const [projects, setProjects]   = useState<any[]>([])
-  const [dueOnly, setDueOnly]     = useState(false)
+  // Initialize from URL query param — supports dashboard link /payments?dueOnly=true
+  const [dueOnly, setDueOnly] = useState(() => searchParams.get('dueOnly') === 'true')
 
   const [newPaymentForm, setNewPaymentForm] = useState({
     clientId: '', projectId: '', totalAmount: 0, dueDate: '',
@@ -26,14 +30,14 @@ export default function PaymentsPage() {
   })
   const [saving, setSaving] = useState(false)
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
     axios.get('/api/payments', { params: { dueOnly } })
       .then((r) => setPayments(r.data.payments))
       .finally(() => setLoading(false))
-  }
+  }, [dueOnly])
 
-  useEffect(() => { load() }, [dueOnly])
+  useEffect(() => { load() }, [load])
   useEffect(() => {
     axios.get('/api/clients').then((r) => setClients(r.data.clients))
   }, [])

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import SupportTicket from '@/models/SupportTicket'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { searchParams } = new URL(request.url)
@@ -27,6 +30,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const body   = await request.json()

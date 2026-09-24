@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { Plus, Search, UserCheck, MapPin, Phone, Send, Edit2, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
@@ -9,13 +9,13 @@ import clsx from 'clsx'
 import { BD_DISTRICTS, DIVISIONS, getDistrictsByDivision, getUpazilasByDistrict } from '@/constants/bd-districts'
 
 export default function RepresentativesPage() {
-  const [reps, setReps]         = useState<any[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [search, setSearch]     = useState('')
+  const [reps, setReps] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
   const [district, setDistrict] = useState('')
-  const [status, setStatus]     = useState('')
+  const [status, setStatus] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [saving, setSaving]     = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const [form, setForm] = useState({
     name: '', phone: '', email: '', address: '', district: '', upazila: '',
@@ -24,14 +24,14 @@ export default function RepresentativesPage() {
   })
   const [selectedDivision, setSelectedDivision] = useState('')
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true)
     axios.get('/api/representatives', { params: { search, district, status } })
       .then((r) => setReps(r.data.representatives))
       .finally(() => setLoading(false))
-  }
+  }, [search, district, status])
 
-  useEffect(() => { load() }, [search, district, status])
+  useEffect(() => { load() }, [load])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,7 +75,7 @@ export default function RepresentativesPage() {
       <div className="glass-card p-4 flex flex-wrap gap-3">
         <div className="flex-1 min-w-48 relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-          <input type="text" placeholder="নাম বা ফোন দিয়ে খুঁজুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-dark pl-9" />
+          <input type="text" placeholder="     নাম বা ফোন দিয়ে খুঁজুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-dark pl-9" />
         </div>
         <select value={district} onChange={(e) => setDistrict(e.target.value)} className="input-dark w-40">
           <option value="">সব জেলা</option>
@@ -176,19 +176,19 @@ export default function RepresentativesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">নাম *</label>
-                  <input required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="input-dark" placeholder="পূর্ণ নাম" />
+                  <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input-dark" placeholder="পূর্ণ নাম" />
                 </div>
                 <div>
                   <label className="form-label">ফোন *</label>
-                  <input required value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} className="input-dark" placeholder="০১XXXXXXXXX" />
+                  <input required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="input-dark" placeholder="০১XXXXXXXXX" />
                 </div>
                 <div>
                   <label className="form-label">ইমেইল</label>
-                  <input type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} className="input-dark" placeholder="email@example.com" />
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input-dark" placeholder="email@example.com" />
                 </div>
                 <div>
                   <label className="form-label">কমিশন হার (%)</label>
-                  <input type="number" value={form.commissionRate} onChange={(e) => setForm({...form, commissionRate: +e.target.value})} className="input-dark" />
+                  <input type="number" value={form.commissionRate} onChange={(e) => setForm({ ...form, commissionRate: +e.target.value })} className="input-dark" />
                 </div>
                 <div>
                   <label className="form-label">বিভাগ</label>
@@ -199,45 +199,45 @@ export default function RepresentativesPage() {
                 </div>
                 <div>
                   <label className="form-label">জেলা *</label>
-                  <select required value={form.district} onChange={(e) => setForm({...form, district: e.target.value, upazila: ''})} className="input-dark">
+                  <select required value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value, upazila: '' })} className="input-dark">
                     <option value="">জেলা নির্বাচন করুন</option>
                     {divisionalDistricts.map((d) => <option key={d.id} value={d.name}>{d.name}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="form-label">উপজেলা *</label>
-                  <select required value={form.upazila} onChange={(e) => setForm({...form, upazila: e.target.value})} className="input-dark">
+                  <select required value={form.upazila} onChange={(e) => setForm({ ...form, upazila: e.target.value })} className="input-dark">
                     <option value="">উপজেলা নির্বাচন করুন</option>
                     {upazilas.map((u) => <option key={u.id} value={u.name}>{u.name}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="form-label">স্ট্যাটাস</label>
-                  <select value={form.status} onChange={(e) => setForm({...form, status: e.target.value})} className="input-dark">
+                  <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="input-dark">
                     <option value="সক্রিয়">সক্রিয়</option>
                     <option value="নিষ্ক্রিয়">নিষ্ক্রিয়</option>
                   </select>
                 </div>
                 <div>
                   <label className="form-label">Telegram Chat ID</label>
-                  <input value={form.telegramChatId} onChange={(e) => setForm({...form, telegramChatId: e.target.value})} className="input-dark" placeholder="যেমন: 123456789" />
+                  <input value={form.telegramChatId} onChange={(e) => setForm({ ...form, telegramChatId: e.target.value })} className="input-dark" placeholder="যেমন: 123456789" />
                 </div>
                 <div>
                   <label className="form-label">Telegram Username</label>
-                  <input value={form.telegramUsername} onChange={(e) => setForm({...form, telegramUsername: e.target.value})} className="input-dark" placeholder="@username" />
+                  <input value={form.telegramUsername} onChange={(e) => setForm({ ...form, telegramUsername: e.target.value })} className="input-dark" placeholder="@username" />
                 </div>
                 <div>
                   <label className="form-label">NID নম্বর</label>
-                  <input value={form.nidNumber} onChange={(e) => setForm({...form, nidNumber: e.target.value})} className="input-dark" placeholder="জাতীয় পরিচয়পত্র নম্বর" />
+                  <input value={form.nidNumber} onChange={(e) => setForm({ ...form, nidNumber: e.target.value })} className="input-dark" placeholder="জাতীয় পরিচয়পত্র নম্বর" />
                 </div>
               </div>
               <div>
                 <label className="form-label">ঠিকানা *</label>
-                <input required value={form.address} onChange={(e) => setForm({...form, address: e.target.value})} className="input-dark" placeholder="পূর্ণ ঠিকানা" />
+                <input required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="input-dark" placeholder="পূর্ণ ঠিকানা" />
               </div>
               <div>
                 <label className="form-label">নোট</label>
-                <textarea value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} className="input-dark" rows={2} />
+                <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="input-dark" rows={2} />
               </div>
 
               {/* Telegram Chat ID How-to */}

@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Client from '@/models/Client'
 import { encryptCredentials, decryptCredentials } from '@/lib/encryption'
+import { verifyAuth, isAuthError } from '@/lib/auth'
 
 // GET all clients
 export async function GET(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const { searchParams } = new URL(request.url)
@@ -35,6 +38,8 @@ export async function GET(request: NextRequest) {
 
 // POST create new client
 export async function POST(request: NextRequest) {
+  const auth = await verifyAuth(request)
+  if (isAuthError(auth)) return auth
   try {
     await connectDB()
     const body = await request.json()
